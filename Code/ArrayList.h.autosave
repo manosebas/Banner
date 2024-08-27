@@ -1,0 +1,154 @@
+#ifndef ArrayList_h
+#define ArrayList_h
+
+#include "RunTimeExceptions.h"
+
+template <class T>
+class Nodo
+{
+private:
+    T valor;
+    Nodo * siguiente{nullptr};
+    Nodo* anterior{nullptr};
+public:
+    Nodo(T val):valor(val){}
+    void setValor(T valor){
+        this->valor=valor;
+    }
+    T getValor(){
+        return valor;
+    }
+    void setSiguienteNodo(Nodo* siguiente){
+        this->siguiente= siguiente;
+    }
+    Nodo* getSiguienteNodo(){
+        return siguiente;
+    }
+    void setAnteriorNodo(Nodo* anterior){
+        this->anterior= anterior;
+    }
+    Nodo* getAnteriorNodo(){
+        return anterior;
+    }
+};
+
+template <class T>
+class ArrayList
+{
+private:
+    int size{0};
+    Nodo<T>* primero{nullptr};
+    Nodo<T>* ultimo{nullptr};
+public:
+    void addObject(T val){
+        Nodo<T> * nodo = new Nodo<T>(val);
+        if(size==0){
+            primero = nodo;
+            ultimo = nodo;
+        }else{
+            nodo->setAnteriorNodo(ultimo);
+            ultimo->setSiguienteNodo(nodo);
+            ultimo = nodo;
+        }
+        size++;
+    }
+
+    int getSize(){
+        return this->size;
+    }
+
+    void deleteObjectAt(unsigned int index){
+        if(size == 0){
+            throw EmptyArrayList();
+        }else{
+            if(index+1 <= size){
+                Nodo<T> *nodo = primero;
+                for(int i=0; i!=index; i++){
+                    nodo = nodo->getSiguienteNodo();
+                }
+                Nodo<T> *to_replace = nodo;
+                Nodo<T> *anterior = nodo->getAnteriorNodo();
+                Nodo<T> *siguiente = nodo->getSiguienteNodo();
+
+                if(anterior == nullptr or siguiente == nullptr){
+                    if(anterior == nullptr and siguiente != nullptr){
+                        primero = siguiente;
+                    }else if (siguiente == nullptr and anterior != nullptr){
+                        ultimo = anterior;
+                    }else{
+                        primero = nullptr;
+                        ultimo = nullptr;
+                    }
+                    delete to_replace;
+                }else{
+                    siguiente->setAnteriorNodo(anterior);
+                    anterior->setSiguienteNodo(siguiente);
+                    delete to_replace;
+                }
+                size--;
+            }else{
+                throw IndexOutOfBounds();
+            }
+        }
+    }
+
+    void addObjectAt(T valor, unsigned int index){
+        if(size == 0){
+            throw IndexOutOfBounds();
+        }else{
+            if(index+1 <= size){
+                Nodo<T> *nuevoNodo = new Nodo<T>(valor);
+                Nodo<T> *current = primero;
+
+                for(int i=0; i!=index; i++){
+                    current = current->getSiguienteNodo();
+                }
+
+                Nodo<T> *anterior = current->getAnteriorNodo();
+                Nodo<T> *siguiente = current->getSiguienteNodo();
+
+                if(anterior == nullptr or siguiente == nullptr){
+                    if(anterior == nullptr and siguiente != nullptr){
+                        primero = nuevoNodo;
+                        nuevoNodo->setSiguienteNodo(current);
+                        current->setAnteriorNodo(nuevoNodo);
+                    }else if (siguiente == nullptr and anterior != nullptr){
+                        nuevoNodo->setSiguienteNodo(ultimo);
+                        nuevoNodo->setAnteriorNodo(anterior);
+                        anterior->setSiguienteNodo(nuevoNodo);
+                        current->setAnteriorNodo(nuevoNodo);
+                    }
+                }else{
+                    nuevoNodo->setSiguienteNodo(current);
+                    nuevoNodo->setAnteriorNodo(anterior);
+                    anterior->setSiguienteNodo(nuevoNodo);
+                    current->setAnteriorNodo(nuevoNodo);
+                }
+                size++;
+            }else{
+                throw IndexOutOfBounds();
+            }
+        }
+    }
+
+    T operator[](int index){
+        if(size == 0){
+            throw EmptyArrayList();
+        }
+        else{
+            if(index+1 <= size){
+                Nodo<T> *nodo = primero;
+                for(int i=0; i!=index; i++){
+                    nodo = nodo->getSiguienteNodo();
+                }
+                return nodo->getValor();
+            }
+            else{
+                throw IndexOutOfBounds();
+            }
+        }
+    }
+
+};
+
+#endif
